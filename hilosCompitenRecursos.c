@@ -19,7 +19,7 @@ void* thread1(void* arg) {
     sleep(1);
 
     printf("Thread 1: Intentando bloquear Recurso 2...\n");
-    
+
     // Intentamos bloquear el segundo recurso. Aquí puede ocurrir el interbloqueo
     // si el segundo hilo ya tiene este recurso bloqueado.
     pthread_mutex_lock(&resource2);
@@ -56,7 +56,6 @@ void* thread2(void* arg) {
     // Finalizamos la ejecución del hilo.
     return NULL;
 }
-
 int main() {
     pthread_t t1, t2; // Declaramos dos identificadores de hilo
 
@@ -78,7 +77,6 @@ int main() {
     // Destruimos los recursos (mutex).
     // Esto limpia los mutex, liberando los recursos del sistema.
     pthread_mutex_destroy(&resource1);
-    pthread_mutex_destroy(&resource2);
-    
+    pthread_mutex_destroy(&resource2);  
     return 0; // Finalizamos el programa.
 }
