@@ -1,6 +1,7 @@
 #include <pthread.h> // Biblioteca para crear, gestionar y sincronizar hilos y mutex en C.
 #include <stdio.h> // Biblioteca estándar de entrada/salida.
 #include <unistd.h> // Para la función sleep().
+#include <time.h> // Biblioteca para manejar tiempos
 
 pthread_mutex_t resource1; // Definimos un mutex que simula el Recurso 1. 
 pthread_mutex_t resource2; // Definimos un mutex que simula el Recurso 2. 
@@ -51,8 +52,10 @@ void* thread2(void* arg) {
 
 // Función para detectar y resolver interbloqueos (deadlocks).
 void detect_deadlock() {
-    // Intentamos bloquear ambos recursos usando pthread_mutex_trylock.
-    // Esta función no bloquea al hilo; simplemente intenta adquirir el bloqueo.
+    clock_t start_time, end_time; // Variables para medir tiempo
+
+    start_time = clock(); // Registramos el tiempo de inicio
+
     int lock1 = pthread_mutex_trylock(&resource1);
     int lock2 = pthread_mutex_trylock(&resource2);
 
@@ -71,6 +74,11 @@ void detect_deadlock() {
     // Si logramos bloquear algún recurso, lo desbloqueamos inmediatamente para no alterar el comportamiento normal.
     if (lock1 == 0) pthread_mutex_unlock(&resource1);
     if (lock2 == 0) pthread_mutex_unlock(&resource2);
+
+    end_time = clock(); // Registramos el tiempo de finalización
+
+    double time_spent = (double)(end_time - start_time) / CLOCKS_PER_SEC; // Tiempo en segundos
+    printf("Tiempo de resolución de deadlock: %.6f segundos\n", time_spent);
 }
 
 // Función principal.

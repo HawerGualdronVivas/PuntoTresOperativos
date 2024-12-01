@@ -14,19 +14,23 @@ int tiempos_espera[NUM_HILOS];  // Array que almacena el tiempo de espera de cad
 int prioridades[NUM_HILOS];     // Array que almacena la prioridad de cada hilo (0 = baja, 1 = alta)
 
 // Función que simula el trabajo de cada hilo
+#include <time.h> // Biblioteca para manejar tiempos
+
+// En la función "hilo":
 void* hilo(void* arg) {
     int id = *((int*)arg);  // Convertimos el argumento para obtener el ID del hilo
-
+    clock_t start_time, end_time; // Variables para medir tiempos de espera
+    start_time = clock();         // Registramos el inicio del tiempo de espera
+    
     // Simulamos un retraso inicial para hilos de baja prioridad
     if (prioridades[id] == 0) {
         printf("Hilo %d (baja prioridad) tiene un retraso inicial.\n", id);
-        sleep(2);  // Retraso para los hilos de baja prioridad
+        sleep(2);
     }
 
-    while (1) {  // Ciclo infinito hasta que el hilo acceda al recurso
-        // Verificamos si el hilo ha esperado demasiado tiempo
+    while (1) {
         if (tiempos_espera[id] > TIEMPO_MAX_ESPERA) {
-            prioridades[id] = 1;  // Incrementamos la prioridad del hilo
+            prioridades[id] = 1;
             printf("Hilo %d (baja prioridad) está siendo favorecido.\n", id);
         }
 
@@ -34,9 +38,14 @@ void* hilo(void* arg) {
         if (pthread_mutex_trylock(&recurso) == 0) {
             // Acceso exitoso al recurso
             printf("Hilo %d accedió al recurso.\n", id);
-            sleep(1);  // Simulamos el tiempo que el hilo usa el recurso
-            pthread_mutex_unlock(&recurso);  // Liberamos el recurso
-            break;  // Salimos del ciclo porque el hilo ya accedió al recurso
+            sleep(1);
+            pthread_mutex_unlock(&recurso);
+
+            end_time = clock(); // Registramos el final del tiempo de espera
+            double wait_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+            printf("Hilo %d: Tiempo de espera total: %.6f segundos\n", id, wait_time);
+            tiempos_espera[id] = wait_time; // Guardamos el tiempo de espera
+            break;
         } else {
             // No se pudo acceder al recurso, incrementamos el tiempo de espera
             tiempos_espera[id]++;
